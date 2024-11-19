@@ -1,4 +1,5 @@
 import torch
+import warnings
 
 from transformers import AutoTokenizer, get_cosine_schedule_with_warmup
 from torch.utils.data import DataLoader
@@ -40,17 +41,18 @@ def train(model, dataloader):
             opt.step()
             lr_scheduler.step()
 
-            if i % 1 == 0:
+            if i % 10 == 0:
                 print(f"\t{i} / {len(dataloader)} iters.\tLoss: {loss.item():.4f}")
 
 
 if __name__ == "__main__":
+    warnings.simplefilter("ignore")
     tokenizer = AutoTokenizer.from_pretrained("google-bert/bert-base-cased")
 
     dataset = StoryDataset(tokenizer)
     dataloader = DataLoader(
         dataset,
-        batch_size=64,
+        batch_size=24,
         shuffle=True,
         pin_memory=True,
         collate_fn=dataset.collate
@@ -58,9 +60,9 @@ if __name__ == "__main__":
 
     model = GPT(
         vocab_size=tokenizer.vocab_size,
-        d_model=512,
-        n_layers=8,
-        n_heads=8,
+        d_model=768,
+        n_layers=12,
+        n_heads=12,
         max_length=tokenizer.model_max_length
     )
 
