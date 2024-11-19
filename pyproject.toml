@@ -13,6 +13,7 @@ transformers = "^4.46.3"
 torch = "^2.5.1"
 numpy = "^2.1.3"
 polars = "^1.14.0"
+accelerate = "^1.1.1"
 
 
 [build-system]

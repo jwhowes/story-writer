@@ -1,8 +1,6 @@
 import polars as pl
-import torch
 
 from torch.utils.data import Dataset
-from transformers import BatchEncoding
 
 
 class StoryDataset(Dataset):
@@ -18,7 +16,7 @@ class StoryDataset(Dataset):
         return len(self.texts)
 
     def collate(self, text):
-        return self.tokenizer(text, padding=True, truncation=True, return_tensors="pt")
+        return self.tokenizer(text, padding=True, truncation=True, return_tensors="pt")["input_ids"]
 
     def __getitem__(self, idx):
         return self.texts[idx]
