@@ -7,7 +7,7 @@ from accelerate import Accelerator
 from torch import nn
 
 from src.data import StoryDataset
-from src.model import GPT
+from src.model import DiffusionModel
 
 
 def train(model, dataloader):
@@ -22,20 +22,16 @@ def train(model, dataloader):
         num_training_steps=num_epochs * len(dataloader)
     )
 
-    criterion = nn.CrossEntropyLoss(ignore_index=0)
-
     model, dataloader, opt, lr_scheduler = accelerator.prepare(
         model, dataloader, opt, lr_scheduler
     )
 
     for epoch in range(num_epochs):
         print(f"EPOCH {epoch + 1} / {num_epochs}")
-        for i, tokens in enumerate(dataloader):
+        for i, (tokens, clean_mask) in enumerate(dataloader):
             opt.zero_grad()
 
-            logits = model(tokens[:, :-1])
-
-            loss = criterion(logits.transpose(1, 2), tokens[:, 1:])
+            loss = model(tokens, clean_mask)
             loss.backward()
 
             opt.step()
@@ -54,13 +50,13 @@ if __name__ == "__main__":
         dataset,
         batch_size=24,
         shuffle=True,
-        pin_memory=True,
-        collate_fn=dataset.collate
+        pin_memory=True
     )
 
-    model = GPT(
+    model = DiffusionModel(
         vocab_size=tokenizer.vocab_size,
         d_model=768,
+        d_t=768,
         n_layers=12,
         n_heads=12,
         max_length=tokenizer.model_max_length
